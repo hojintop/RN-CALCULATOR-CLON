@@ -54,11 +54,18 @@ export default () => {
   const [result, setResult] = useState(null);
   const [tempInput, setTempInput] = useState(null);
   const [tempOperator, setTempOperator] = useState(null);
+  const [isClickedOperator, setIsClickedOperator] = useState(false);
+  const [isClickedEqual, setIsClickedEqual] = useState(false);
+
+  // 현재 input value 가 있는지 판단
+  const hasInput = !!input;
+
 
   function onPressNum(num) {
-    if(currentOperator){
+    if(currentOperator && isClickedOperator){
       setResult(input);
       setInput(num);
+      setIsClickedOperator(false);
     }else{
       const newInput = Number(`${input}${num}`);
       setInput(newInput);
@@ -68,38 +75,49 @@ export default () => {
   function onPressOperator(operator){
     if(operator !== '='){
       setCurrentOperator(operator);
+      setIsClickedOperator(true);
+      setIsClickedEqual(false);
     }else{
       // = TODO
       var finalResult = result;
-      console.log(currentOperator);
-      switch(currentOperator){
+      var finalInput = isClickedEqual ? tempInput : input;
+      var finalOperator = isClickedEqual? tempOperator : currentOperator;
+      switch(finalOperator){
         case '/':
-          finalResult = result / input;
+          finalResult = result / finalInput;
           break;
         case 'x':
-          finalResult = result * input;
+          finalResult = result * finalInput;
           break;
         case '-':
-          finalResult = result - input;
+          finalResult = result - finalInput;
           break;
         case '+':
-          finalResult = result + input;
+          finalResult = result + finalInput;
           break;
         default:
           break;
       }
       setResult(finalResult);
       setInput(finalResult);
+      setTempInput(finalInput);
+      setCurrentOperator(null);
+      setTempOperator(finalOperator);
+      setIsClickedEqual(true);
 
     }
   }
 
   function onPressReset(){
-    setInput(0);
-    setCurrentOperator(null);
-    setResult(null);
-    setTempInput(null);
-    setTempOperator(null);
+    if(hasInput){
+      setInput(0);
+    }else{
+      setInput(0);
+      setCurrentOperator(null);
+      setResult(null);
+      setTempInput(null);
+      setTempOperator(null);
+    }
   }
 
   return (
@@ -118,7 +136,7 @@ export default () => {
       </InputContainer>
       {/* AC ~ / */}
       <ButtonContainer>
-        <Button type="reset" text="AC" onPress={onPressReset} flex={3} />
+        <Button type="reset" text={hasInput ? "C" : "AC"} onPress={onPressReset} flex={3} />
         <Button type="operator" text="/" isSelected={currentOperator === '/'} onPress={() => onPressOperator('/')} flex={1} />
       </ButtonContainer>
       {/* 7 ~ X */}
